@@ -21,7 +21,7 @@ func dailySync(s *scheduler.Scheduler) {
 		nextRunTime := time.Date(now.Year(), now.Month(), now.Day(), 03, 0, 0, 0, now.Location())
 		if now.After(nextRunTime) {
 			nextRunTime = nextRunTime.Add(24 * time.Hour)
-			fmt.Println(fmt.Sprintf("Next run time is tomorrow at %s", nextRunTime.Format("2006-01-02 15:04:05")))
+			fmt.Printf("Next run time is tomorrow at %s \n", nextRunTime.Format("2006-01-02 15:04:05"))
 		}
 
 		durationUntilNextRun := nextRunTime.Sub(now)
@@ -53,10 +53,10 @@ func main() {
 	db.AutoMigrate(&database.Report{})
 	dbClient := database.NewClient(db)
 
-	for cluster, opencostUrl := range cfg.OpenCostURLs {
-		fmt.Println(fmt.Sprintf("Starting scheduler for cluster %s with URL %s", cluster, opencostUrl))
+	for cluster, opencostURL := range cfg.OpenCostURLs {
+		fmt.Printf("Starting scheduler for cluster %s with URL %s \n", cluster, opencostURL)
 
-		instanceScheduler := scheduler.NewScheduler(dbClient, "container,namespace", opencostUrl, cfg.FullSync, cluster)
+		instanceScheduler := scheduler.NewScheduler(dbClient, "container,namespace", opencostURL, cfg.FullSync, cluster)
 
 		go instanceScheduler.SyncAllReports()
 

@@ -1,0 +1,83 @@
+name: Build container image and run Pharos security scan
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore:
+      - README.md
+      - CONTRIBUTING.md
+      - LICENSE
+      - CODEOWNERS
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - README.md
+      - CONTRIBUTING.md
+      - LICENSE
+      - CODEOWNERS
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-container-image:
+    name: Build container image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            # Use sha for tags tags
+            type=sha,format=long
+            # set latest tag for default branch
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        id: build-docker
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ !github.event.pull_request.draft }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Notice of image digest
+        run: echo "${{ steps.build-docker.outputs.digest }}" >> $GITHUB_STEP_SUMMARY
+    outputs:
+      image_digest: ${{ steps.build-docker.outputs.digest }}
+
+  pharos-scan:
+    if: (!github.event.pull_request.draft)
+    name: Run Pharos Security Scan
+    needs: build-container-image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      actions: read
+      security-events: write
+    steps:
+      - name: Run Pharos
+        uses: kartverket/pharos@v0.2.1
+        with:
+          image_url: "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{needs.build.outputs.image_digest}}"
+          tfsec: false
+

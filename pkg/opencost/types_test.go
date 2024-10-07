@@ -3,12 +3,12 @@ package opencost
 import (
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
-	"io/ioutil"
+	"os"
 	"testing"
 )
 
 func TestLoadJSON(t *testing.T) {
-	data, err := ioutil.ReadFile("../../test_files/opencost_response.json")
+	data, err := os.ReadFile("../../test_files/opencost_response.json")
 	if err != nil {
 		t.Fatalf("Failed to read test_data.json: %v", err)
 	}
