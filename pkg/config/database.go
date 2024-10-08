@@ -17,17 +17,14 @@ type DatabaseConfig struct {
 
 func getDatabaseConfig() (string, error) {
 	v := viper.New()
-
+	var dbConfig DatabaseConfig
 	v.SetEnvPrefix("DATABASE")
+	v.AutomaticEnv()
 
 	v.SetDefault("port", "5432")
 	v.SetDefault("ssl", "disable")
 
-	v.AutomaticEnv()
-
-	var dbConfig DatabaseConfig
-
-	err := viper.Unmarshal(&dbConfig)
+	err := v.Unmarshal(&dbConfig)
 	if err != nil {
 		return "", fmt.Errorf("unable to decode configuration into struct: %v", err)
 	}
