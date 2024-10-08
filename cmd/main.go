@@ -47,7 +47,7 @@ func main() {
 		db, err = gorm.Open(postgres.Open(cfg.DatabaseConfig), &gorm.Config{
 			NamingStrategy: schema.NamingStrategy{
 				TablePrefix: schemaName + ".",
-			}0
+			},
 		})
 		if err = db.Exec("CREATE SCHEMA IF NOT EXISTS " + schemaName).Error; err != nil {
 			panic("failed to create schema: " + err.Error())
