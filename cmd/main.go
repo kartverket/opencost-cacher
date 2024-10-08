@@ -41,7 +41,7 @@ func main() {
 
 	var db *gorm.DB
 	if cfg.LocalDB {
-		db, err = gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+		db, _ = gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
 	} else {
 		schemaName := "cacher"
 		db, err = gorm.Open(postgres.Open(cfg.DatabaseConfig), &gorm.Config{
@@ -49,14 +49,15 @@ func main() {
 				TablePrefix: schemaName + ".",
 			},
 		})
+
+		if err != nil {
+			fmt.Println(fmt.Errorf("error connecting to database: %v", err))
+			os.Exit(1)
+		}
+
 		if err = db.Exec("CREATE SCHEMA IF NOT EXISTS " + schemaName).Error; err != nil {
 			panic("failed to create schema: " + err.Error())
 		}
-	}
-
-	if err != nil {
-		fmt.Println(fmt.Errorf("error connecting to database: %v", err))
-		os.Exit(1)
 	}
 
 	db.AutoMigrate(&database.Report{})
