@@ -20,7 +20,7 @@ builds:
 dockers:
   - dockerfile: 'Dockerfile'
     image_templates:
-      - "ghcr.io/kartverket/{{ .ProjectName }}:{{ .Version }}"
+      - "ghcr.io/kartverket/{{ .ProjectName }}:v{{ .Version }}"
 
 archives:
   - format: tar.gz

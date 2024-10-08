@@ -46,6 +46,7 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   pharos-job:
     name: Run Pharos with Required Permissions
     needs: release
