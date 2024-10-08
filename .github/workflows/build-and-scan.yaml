@@ -1,0 +1,90 @@
+name: Build container image and run Pharos security scan
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore:
+      - README.md
+      - CONTRIBUTING.md
+      - LICENSE
+      - CODEOWNERS
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - README.md
+      - CONTRIBUTING.md
+      - LICENSE
+      - CODEOWNERS
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-container-image:
+    name: Build container image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: all
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@70fccc794acd729b2b22dd6a326895f286447728
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release with Goreleaser
+        id: goreleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean --snapshot
+
+      - name: build image digest
+        run: |
+          echo "IMAGE_DIGEST=${{env.REGISTRY}}/${{env.IMAGE_NAME}}:SNAPSHOT-${{github.sha}}" >> $GITHUB_ENV
+          echo "IMAGE_DIGEST=${{env.REGISTRY}}/${{env.IMAGE_NAME}}:SNAPSHOT-${{github.sha}}" >> $GITHUB_OUTPUT  
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ env.IMAGE_DIGEST }}
+
+    outputs:
+      image_digest: ${{ env.IMAGE_DIGEST }}
+
+  pharos-scan:
+    if: ${{ !github.event.pull_request.draft }}
+    name: Run Pharos Security Scan
+    needs: build-container-image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      actions: read
+      security-events: write
+    steps:
+      - name: Run Pharos
+        uses: kartverket/pharos@v0.2.1
+        with:
+          image_url: "${{ needs.build-container-image.outputs.image_digest }}"
+          tfsec: false

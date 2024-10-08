@@ -1,0 +1,50 @@
+version: 2
+project_name: opencost-cacher
+builds:
+  - id: opencost-cacher
+    main: ./cmd/main.go
+    binary: opencost-cacher
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -extldflags "-static"
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    flags:
+      - -tags=timetzdata
+
+dockers:
+  - dockerfile: 'Dockerfile'
+    image_templates:
+      - "ghcr.io/kartverket/{{ .ProjectName }}:{{ .Version }}"
+
+archives:
+  - format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    files:
+      - LICENSE
+      - README.md
+
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+snapshot:
+  version_template: 'SNAPSHOT-{{ .Commit }}'
