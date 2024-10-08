@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*.*.*'
 
+env:
+  REGISTRY: ghcr.io
+
 jobs:
   release:
     name: Goreleaser Release
