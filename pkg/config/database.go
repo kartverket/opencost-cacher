@@ -7,22 +7,26 @@ import (
 )
 
 type DatabaseConfig struct {
-	Username string `mapstructure:"username"`
-	Password string `mapstructure:"password"`
-	Host     string `mapstructure:"host"`
-	Port     string `mapstructure:"port"`
-	Database string `mapstructure:"database"`
-	Ssl      string `mapstructure:"ssl"`
+	Username string `mapstructure:"DATABASE_USERNAME"`
+	Password string `mapstructure:"DATABASE_PASSWORD"`
+	Host     string `mapstructure:"DATABASE_HOST"`
+	Port     string `mapstructure:"DATABASE_PORT"`
+	Database string `mapstructure:"DATABASE_DB"`
+	Ssl      string `mapstructure:"DATABASE_SSL"`
 }
 
 func getDatabaseConfig() (string, error) {
 	v := viper.New()
 	var dbConfig DatabaseConfig
-	v.SetEnvPrefix("DATABASE")
-	v.AutomaticEnv()
+	v.SetDefault("DATABASE_PORT", "5432")
+	v.SetDefault("DATABASE_SSL", "disable")
 
-	v.SetDefault("port", "5432")
-	v.SetDefault("ssl", "disable")
+	v.BindEnv("DATABASE_USERNAME")
+	v.BindEnv("DATABASE_PASSWORD")
+	v.BindEnv("DATABASE_HOST")
+	v.BindEnv("DATABASE_PORT")
+	v.BindEnv("DATABASE_DB")
+	v.BindEnv("DATABASE_SSL")
 
 	err := v.Unmarshal(&dbConfig)
 	if err != nil {
