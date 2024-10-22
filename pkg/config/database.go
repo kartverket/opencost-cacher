@@ -7,12 +7,15 @@ import (
 )
 
 type DatabaseConfig struct {
-	Username string `mapstructure:"DATABASE_USERNAME"`
-	Password string `mapstructure:"DATABASE_PASSWORD"`
-	Host     string `mapstructure:"DATABASE_HOST"`
-	Port     string `mapstructure:"DATABASE_PORT"`
-	Database string `mapstructure:"DATABASE_DB"`
-	Ssl      string `mapstructure:"DATABASE_SSL"`
+	Username   string `mapstructure:"DATABASE_USERNAME"`
+	Password   string `mapstructure:"DATABASE_PASSWORD"`
+	Host       string `mapstructure:"DATABASE_HOST"`
+	Port       string `mapstructure:"DATABASE_PORT"`
+	Database   string `mapstructure:"DATABASE_DB"`
+	Ssl        string `mapstructure:"DATABASE_SSL"`
+	CaCert     string `mapstructure:"DATABASE_CA_CERT_PATH"`
+	ClientCert string `mapstructure:"DATABASE_CLIENT_CERT_PATH"`
+	ClientKey  string `mapstructure:"DATABASE_CLIENT_KEY_PATH"`
 }
 
 func getDatabaseConfig() (string, error) {
@@ -27,6 +30,9 @@ func getDatabaseConfig() (string, error) {
 	v.BindEnv("DATABASE_PORT")
 	v.BindEnv("DATABASE_DB")
 	v.BindEnv("DATABASE_SSL")
+	v.BindEnv("DATABASE_CA_CERT_PATH")
+	v.BindEnv("DATABASE_CLIENT_CERT_PATH")
+	v.BindEnv("DATABASE_CLIENT_KEY_PATH")
 
 	err := v.Unmarshal(&dbConfig)
 	if err != nil {
@@ -51,8 +57,26 @@ func getDatabaseConfig() (string, error) {
 		return "", fmt.Errorf("missing required environment variables: %s", strings.Join(missingFields, ", "))
 	}
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
-		dbConfig.Host, dbConfig.Username, dbConfig.Password, dbConfig.Database, dbConfig.Port, dbConfig.Ssl)
+	params := []string{
+		fmt.Sprintf("host=%s", dbConfig.Host),
+		fmt.Sprintf("user=%s", dbConfig.Username),
+		fmt.Sprintf("password=%s", dbConfig.Password),
+		fmt.Sprintf("dbname=%s", dbConfig.Database),
+		fmt.Sprintf("port=%s", dbConfig.Port),
+		fmt.Sprintf("sslmode=%s", dbConfig.Ssl),
+	}
+
+	if dbConfig.CaCert != "" {
+		params = append(params, fmt.Sprintf("sslrootcert=%s", dbConfig.CaCert))
+	}
+	if dbConfig.ClientCert != "" {
+		params = append(params, fmt.Sprintf("sslcert=%s", dbConfig.ClientCert))
+	}
+	if dbConfig.ClientKey != "" {
+		params = append(params, fmt.Sprintf("sslkey=%s", dbConfig.ClientKey))
+	}
+
+	dsn := strings.Join(params, " ")
 
 	return dsn, nil
 }
