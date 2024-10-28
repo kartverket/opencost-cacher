@@ -37,7 +37,6 @@ func mapDatabaseReportsToNamespaceCosts(reports []database.Report) []NamespaceCo
 		namespace.MemoryCost += report.RamCost
 		namespace.PVCost += report.PvCost
 		namespace.TotalCost += report.TotalCost
-		namespace.TotalEfficiency += report.TotalEfficiency
 
 		container, exists := namespace.Containers[report.Container]
 		if !exists {
@@ -58,9 +57,19 @@ func mapDatabaseReportsToNamespaceCosts(reports []database.Report) []NamespaceCo
 		container.TotalEfficiency += report.TotalEfficiency
 
 		namespace.Containers[report.Container] = container
+		namespace.TotalEfficiency = getNamespaceEfficiency(namespace)
 		namespaces[report.Namespace] = namespace
 	}
 
 	var namespaceCosts []NamespaceCost = slices.Collect(maps.Values(namespaces))
 	return namespaceCosts
+}
+
+func getNamespaceEfficiency(namespace NamespaceCost) float64 {
+	var totalEfficiency float64 = 0.0
+	for _, container := range namespace.Containers {
+		totalEfficiency += container.TotalEfficiency
+	}
+	totalEfficiency /= float64(len(namespace.Containers))
+	return totalEfficiency
 }
