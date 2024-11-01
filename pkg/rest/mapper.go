@@ -62,6 +62,11 @@ func mapDatabaseReportsToNamespaceCosts(reports []database.Report) []NamespaceCo
 	}
 
 	var namespaceCosts []NamespaceCost = slices.Collect(maps.Values(namespaces))
+
+	if namespaceCosts == nil {
+		namespaceCosts = make([]NamespaceCost, 0)
+	}
+
 	return namespaceCosts
 }
 

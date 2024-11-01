@@ -55,8 +55,8 @@ jobs:
 
       - name: build image digest
         run: |
-          echo "IMAGE_DIGEST=${{env.REGISTRY}}/${{env.IMAGE_NAME}}:SNAPSHOT-${{github.sha}}" >> $GITHUB_ENV
-          echo "IMAGE_DIGEST=${{env.REGISTRY}}/${{env.IMAGE_NAME}}:SNAPSHOT-${{github.sha}}" >> $GITHUB_OUTPUT  
+          echo "IMAGE_DIGEST=${{env.REGISTRY}}/${{env.IMAGE_NAME}}:vSNAPSHOT-${{github.sha}}" >> $GITHUB_ENV
+          echo "IMAGE_DIGEST=${{env.REGISTRY}}/${{env.IMAGE_NAME}}:vSNAPSHOT-${{github.sha}}" >> $GITHUB_OUTPUT  
 
       - name: Push Docker image
         run: |
