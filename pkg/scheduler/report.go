@@ -42,7 +42,7 @@ func (s *Scheduler) saveReportForWindow(window string) error {
 		return err
 	}
 
-	if len(opencostReport.Data[0]) == 0 {
+	if opencostReport == nil || opencostReport.Data == nil || len(opencostReport.Data[0]) == 0 {
 		return errors.New("no data found, probably reached the end of the data")
 	}
 
