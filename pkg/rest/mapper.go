@@ -7,7 +7,7 @@ import (
 )
 
 // used for container,namespace aggregation
-func mapDatabaseReportsToNamespaceCosts(reports []database.Report) []NamespaceCost {
+func mapDatabaseReportsToNamespaceCosts(reports []database.Report, daysBetween int) []NamespaceCost {
 	var namespaces = make(map[string]NamespaceCost)
 	for _, report := range reports {
 		namespace, exists := namespaces[report.Namespace]
@@ -54,7 +54,7 @@ func mapDatabaseReportsToNamespaceCosts(reports []database.Report) []NamespaceCo
 		container.MemoryCost += report.RamCost
 		container.PVCost += report.PvCost
 		container.TotalCost += report.TotalCost
-		container.TotalEfficiency += report.TotalEfficiency
+		container.TotalEfficiency += report.TotalEfficiency / float64(daysBetween)
 
 		namespace.Containers[report.Container] = container
 		namespace.TotalEfficiency = getNamespaceEfficiency(namespace)

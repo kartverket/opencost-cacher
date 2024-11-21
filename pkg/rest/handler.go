@@ -3,6 +3,7 @@ package rest
 import (
 	"github.com/gin-gonic/gin"
 	"kartverket/skip/opencost/pkg/database"
+	"math"
 	"net/http"
 	"strings"
 	"time"
@@ -47,6 +48,8 @@ func (r *RestHandler) getReports(window string, cluster string) ([]NamespaceCost
 	}
 
 	adjustedStartTime := startDate.Add(-time.Hour)
+	duration := endDate.Sub(adjustedStartTime)
+	daysBetween := int(math.Max(duration.Hours()/24, 1))
 
 	var reports []database.Report
 
@@ -60,7 +63,7 @@ func (r *RestHandler) getReports(window string, cluster string) ([]NamespaceCost
 		return nil, err
 	}
 
-	namespaceCosts := mapDatabaseReportsToNamespaceCosts(reports)
+	namespaceCosts := mapDatabaseReportsToNamespaceCosts(reports, daysBetween)
 
 	return namespaceCosts, nil
 }
