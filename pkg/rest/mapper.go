@@ -54,7 +54,7 @@ func mapDatabaseReportsToNamespaceCosts(reports []database.Report, daysBetween i
 		container.MemoryCost += report.RamCost
 		container.PVCost += report.PvCost
 		container.TotalCost += report.TotalCost
-		container.TotalEfficiency += report.TotalEfficiency / float64(daysBetween)
+		container.TotalEfficiency += report.TotalEfficiency * 100 / float64(daysBetween)
 
 		namespace.Containers[report.Container] = container
 		namespace.TotalEfficiency = getNamespaceEfficiency(namespace)
