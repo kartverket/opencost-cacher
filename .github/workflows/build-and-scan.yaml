@@ -77,7 +77,7 @@ jobs:
       security-events: write
     steps:
       - name: Run Pharos
-        uses: kartverket/pharos@v0.2.4
+        uses: kartverket/pharos@v0.3.0
         with:
           image_url: "${{ needs.build-container-image.outputs.image_digest }}"
           tfsec: false
