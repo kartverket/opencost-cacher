@@ -9,7 +9,7 @@ updates:
       timezone: "Europe/Oslo"
 
   - package-ecosystem: "github-actions"
-    directory: "/"
+    directory: "/.github/workflows"
     schedule:
       interval: "weekly"
       day: "monday"
