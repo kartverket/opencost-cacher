@@ -3,7 +3,7 @@ module kartverket/skip/opencost
 go 1.26.6
 
 require (
-	github.com/gin-contrib/cors v1.7.7
+	github.com/gin-contrib/cors v1.7.8
 	github.com/gin-gonic/gin v1.12.0
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
