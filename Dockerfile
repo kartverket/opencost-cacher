@@ -1,4 +1,4 @@
-FROM golang:1.25 as builder
+FROM golang:1.27.3 as builder
 
 RUN useradd -u 150 apprunner
 FROM scratch
